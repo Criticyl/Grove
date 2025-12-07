@@ -31,9 +31,16 @@ target_link_libraries(VoxelEngine PRIVATE
     stb_image 
 )
 
+set(TARGET_NAME VoxelEngine) 
+
+add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/resources        # Source: Your code folder
+    $<TARGET_FILE_DIR:${TARGET_NAME}>/resources  # Dest: Next to the built .exe
+    COMMENT "Copying resources to output directory..."
+)
+
 # Compiler Specific Fixes
 if(MSVC)
     target_compile_definitions(VoxelEngine PUBLIC _CRT_SECURE_NO_WARNINGS)
 endif()
-
-target_compile_definitions(VoxelEngine PUBLIC RESOURCES_PATH="${CMAKE_CURRENT_SOURCE_DIR}/resources/")
