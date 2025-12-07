@@ -1,0 +1,11 @@
+C:/Dev/VoxelProject/build/CMakeFiles/VoxelEngine.dir
+C:/Dev/VoxelProject/build/CMakeFiles/ALL_BUILD.dir
+C:/Dev/VoxelProject/build/CMakeFiles/ZERO_CHECK.dir
+C:/Dev/VoxelProject/build/vendor/GLFW/CMakeFiles/ALL_BUILD.dir
+C:/Dev/VoxelProject/build/vendor/GLFW/src/CMakeFiles/glfw.dir
+C:/Dev/VoxelProject/build/vendor/GLFW/src/CMakeFiles/update_mappings.dir
+C:/Dev/VoxelProject/build/vendor/glad/CMakeFiles/glad.dir
+C:/Dev/VoxelProject/build/vendor/glad/CMakeFiles/ALL_BUILD.dir
+C:/Dev/VoxelProject/build/vendor/stb_image/CMakeFiles/stb_image.dir
+C:/Dev/VoxelProject/build/vendor/stb_image/CMakeFiles/ALL_BUILD.dir
+C:/Dev/VoxelProject/build/vendor/glm/CMakeFiles/ALL_BUILD.dir

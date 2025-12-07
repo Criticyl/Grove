@@ -1,0 +1,4 @@
+# CMake generation dependency list for this directory.
+C:/Dev/VoxelProject/build/CMakeFiles/cmake.verify_globs
+C:/Dev/VoxelProject/vendor/GLFW/CMake/glfw3.pc.in
+C:/Dev/VoxelProject/vendor/GLFW/src/CMakeLists.txt
