@@ -17,7 +17,7 @@ add_subdirectory(vendor/glm)
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_executable(VoxelEngine)
-target_sources(VoxelEngine PRIVATE ${MY_SOURCES} "src/Renderer/Shader.h" "src/Renderer/Shader.cpp" "src/Renderer/VBO.h" "src/Renderer/VBO.cpp")
+target_sources(VoxelEngine PRIVATE ${MY_SOURCES} "src/Renderer/Shader.h" "src/Renderer/Shader.cpp" "src/Renderer/VBO.h" "src/Renderer/VBO.cpp" "src/Renderer/EBO.h" "src/Renderer/EBO.cpp")
 
 target_include_directories(VoxelEngine PUBLIC 
     "${CMAKE_CURRENT_SOURCE_DIR}/include/"
