@@ -3,6 +3,10 @@
 #include <iostream>
 #include <vector>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "Renderer/Shader.h"
 #include "Renderer/VAO.h"
 #include "Renderer/VBO.h"
@@ -40,6 +44,9 @@ int main() {
         return -1;
     }
 
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_ALWAYS);
+
     // TEMPORARY FOR TESTING
     std::vector<float> vertices = {
         0.5f, 0.5f, 0.0f,
@@ -70,9 +77,23 @@ int main() {
             glfwSetWindowShouldClose(window, true);
 
         glClearColor(0.2f, 0.3f, 0.8f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         shaderProg.use();
+
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::rotate(model, (float)glfwGetTime(), glm::vec3(0.0f, 1.0f, 0.0f));
+
+        glm::mat4 view = glm::mat4(1.0f);
+        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+        glm::mat4 projection = glm::mat4(1.0f);
+        projection = glm::perspective(glm::radians(60.0f), static_cast<float>(WIDTH / HEIGHT), 0.f, 100.0f);
+
+        shaderProg.setMat4("model", model);
+        shaderProg.setMat4("view", view);
+        shaderProg.setMat4("projection", projection);
+
         quadVAO.bind();
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
