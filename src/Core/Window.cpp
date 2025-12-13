@@ -23,7 +23,7 @@ namespace Grove {
 
         if (!glfwInit()) {
             std::cerr << "[ERROR] Failed to initialize GLFW" << std::endl;
-            return -1;
+            return;
         }
 
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -34,7 +34,7 @@ namespace Grove {
         if (window == NULL) {
             std::cerr << "[ERROR] Failed to create GLFW window" << std::endl;
             glfwTerminate();
-            return -1;
+            return;
         }
         glfwMakeContextCurrent(window);
 
