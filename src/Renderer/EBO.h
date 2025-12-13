@@ -3,15 +3,18 @@
 #include <glad/glad.h>
 #include <vector>
 
-class EBO {
-public:
-    std::uint32_t ID;
+namespace Grove {
 
-public:
+    class EBO {
+    public:
+        std::uint32_t ID;
 
-    EBO(std::vector<std::uint32_t>& indices);
+    public:
 
-    void bind();
-    void unbind();
-    void deleteBuffer();
-};
+        EBO(std::vector<std::uint32_t>& indices);
+
+        void bind();
+        void unbind();
+        void deleteBuffer();
+    };
+}

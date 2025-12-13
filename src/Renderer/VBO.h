@@ -3,16 +3,18 @@
 #include <glad/glad.h>
 #include <vector>
 
-class VBO {
-public:
-    std::uint32_t ID;
+namespace Grove {
+    class VBO {
+    public:
+        std::uint32_t ID;
 
-public:
+    public:
 
-    VBO(std::vector<float>& vertices);
+        VBO(std::vector<float>& vertices);
 
-    void bind();
-    void unbind();
-    void deleteBuffer();
+        void bind();
+        void unbind();
+        void deleteBuffer();
 
-};
+    };
+}
