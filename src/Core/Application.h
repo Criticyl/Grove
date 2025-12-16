@@ -8,6 +8,7 @@
 #include "../Renderer/VAO.h"
 #include "../Renderer/VBO.h"
 #include "../Renderer/EBO.h"
+#include "../World/Chunk.h"
 
 
 namespace Grove {
@@ -31,9 +32,7 @@ namespace Grove {
 
         // Temp
         std::unique_ptr<Shader> m_Shader;
-        std::unique_ptr<VAO> m_VAO;
-        std::unique_ptr<VBO> m_VBO;
-        std::unique_ptr<EBO> m_EBO;
+        std::unique_ptr<Chunk> m_TestChunk;
 
         float m_DeltaTime;
         float m_LastFrame;

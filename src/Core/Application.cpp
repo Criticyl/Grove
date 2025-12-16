@@ -9,51 +9,11 @@ namespace Grove {
         m_Window = std::make_unique<Window>(1280, 720, "Grove");
         m_Window->init();
 
-        m_Camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
+        m_Camera = std::make_unique<Camera>(glm::vec3(0.0f, 5.0f, 0.0f));
         m_Shader = std::make_unique<Shader>("resources/shaders/default.vert", "resources/shaders/default.frag");
 
-        std::vector<float> vertices = {
-            -0.5f, -0.5f,  0.5f, //Front BL
-             0.5f, -0.5f,  0.5f, //Front BR
-             0.5f,  0.5f,  0.5f, //Front TR
-            -0.5f,  0.5f,  0.5f, //Front TL
-            -0.5f, -0.5f, -0.5f, //Back BL
-             0.5f, -0.5f, -0.5f, //Back BR
-             0.5f,  0.5f, -0.5f, //Back TR
-            -0.5f,  0.5f, -0.5f  //Back TL
-        };
-
-        std::vector<std::uint32_t> indices = {
-            0, 1, 2,
-            2, 3, 0,
-
-            1, 5, 6,
-            6, 2, 1,
-
-            7, 6, 5,
-            5, 4, 7,
-
-            4, 0, 3,
-            3, 7, 4,
-
-            3, 2, 6,
-            6, 7, 3,
-
-            4, 5, 1,
-            1, 0, 4
-        };
-
-        m_VAO = std::make_unique<VAO>();
-        m_VAO->bind();
-
-        m_VBO = std::make_unique<VBO>(vertices);
-        m_EBO = std::make_unique<EBO>(indices);
-
-        m_VAO->linkAttribute(*m_VBO, 0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
-
-        m_VAO->unbind();
-        m_VBO->unbind();
-        m_EBO->unbind();
+        m_TestChunk = std::make_unique<Chunk>(glm::vec3(0, 0, 0));
+        m_TestChunk->generateMesh();
     }
 
     Application::~Application() {
@@ -108,15 +68,12 @@ namespace Grove {
 
         m_Shader->use();
 
-        glm::mat4 projection = glm::perspective(glm::radians(m_Camera->cameraFOV), (float)m_Window->getWidth() / (float)m_Window->getHeight(), 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(m_Camera->cameraFOV), (float)m_Window->getWidth() / (float)m_Window->getHeight(), 0.1f, 1000.0f);
         glm::mat4 view = m_Camera->getViewMatrix();
-        glm::mat4 model = glm::mat4(1.0f);
 
         m_Shader->setMat4("projection", projection);
         m_Shader->setMat4("view", view);
-        m_Shader->setMat4("model", model);
+        m_TestChunk->render(*m_Shader);
 
-        m_VAO->bind();
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     }
 }
