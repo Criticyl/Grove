@@ -13,15 +13,34 @@ namespace Grove {
         m_Shader = std::make_unique<Shader>("resources/shaders/default.vert", "resources/shaders/default.frag");
 
         std::vector<float> vertices = {
-            0.5f,  0.5f, 0.0f,  // top right
-            0.5f, -0.5f, 0.0f,  // bottom right
-            -0.5f, -0.5f, 0.0f,  // bottom left
-            -0.5f,  0.5f, 0.0f   // top left 
+            -0.5f, -0.5f,  0.5f, //Front BL
+             0.5f, -0.5f,  0.5f, //Front BR
+             0.5f,  0.5f,  0.5f, //Front TR
+            -0.5f,  0.5f,  0.5f, //Front TL
+            -0.5f, -0.5f, -0.5f, //Back BL
+             0.5f, -0.5f, -0.5f, //Back BR
+             0.5f,  0.5f, -0.5f, //Back TR
+            -0.5f,  0.5f, -0.5f  //Back TL
         };
 
         std::vector<std::uint32_t> indices = {
-            0, 1, 3,
-            1, 2, 3
+            0, 1, 2,
+            2, 3, 0,
+
+            1, 5, 6,
+            6, 2, 1,
+
+            7, 6, 5,
+            5, 4, 7,
+
+            4, 0, 3,
+            3, 7, 4,
+
+            3, 2, 6,
+            6, 7, 3,
+
+            4, 5, 1,
+            1, 0, 4
         };
 
         m_VAO = std::make_unique<VAO>();
@@ -98,6 +117,6 @@ namespace Grove {
         m_Shader->setMat4("model", model);
 
         m_VAO->bind();
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
     }
 }
