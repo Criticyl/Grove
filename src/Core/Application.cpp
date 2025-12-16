@@ -12,8 +12,7 @@ namespace Grove {
         m_Camera = std::make_unique<Camera>(glm::vec3(0.0f, 5.0f, 0.0f));
         m_Shader = std::make_unique<Shader>("resources/shaders/default.vert", "resources/shaders/default.frag");
 
-        m_TestChunk = std::make_unique<Chunk>(glm::vec3(0, 0, 0));
-        m_TestChunk->generateMesh();
+        m_World = std::make_unique<ChunkManager>();
     }
 
     Application::~Application() {
@@ -73,7 +72,7 @@ namespace Grove {
 
         m_Shader->setMat4("projection", projection);
         m_Shader->setMat4("view", view);
-        m_TestChunk->render(*m_Shader);
+        m_World->render(*m_Shader);
 
     }
 }

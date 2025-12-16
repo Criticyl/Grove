@@ -1,0 +1,41 @@
+#pragma once
+
+#include <map>
+#include <vector>
+#include <memory>
+#include <glm/glm.hpp>
+
+#include "Chunk.h"
+#include "../Renderer/Shader.h"
+
+namespace Grove {
+
+    struct ChunkCoord {
+        int x, z;
+
+        bool operator<(const ChunkCoord& otherChunk) const {
+            if (x != otherChunk.x) return x < otherChunk.x;
+            return z < otherChunk.z;
+        }
+    };
+
+    class ChunkManager {
+    public:
+        ChunkManager();
+        ~ChunkManager();
+
+        void update();
+        void render(Shader& shader);
+
+    public:
+
+        const float VOXEL_SIZE = 0.2f;
+
+    private:
+
+        std::map<ChunkCoord, std::unique_ptr<Chunk>> m_Chunks;
+
+        void createChunk(int x, int z);
+
+    };
+}

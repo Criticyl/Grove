@@ -19,11 +19,6 @@ namespace Grove {
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
                 setVoxel(x, 0, z, 1);
-
-                if (x % 4 == 0 && z % 4 == 0) {
-                    setVoxel(x, 1, z, 2);
-                    setVoxel(x, 2, z, 2);
-                }
             }
         }
 
@@ -182,6 +177,11 @@ namespace Grove {
 
             glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, m_Position);
+
+            float scale = 0.2f;
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, m_Position * scale);
+            model = glm::scale(model, glm::vec3(scale));
 
             shader.setMat4("model", model);
 

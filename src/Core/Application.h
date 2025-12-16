@@ -8,7 +8,7 @@
 #include "../Renderer/VAO.h"
 #include "../Renderer/VBO.h"
 #include "../Renderer/EBO.h"
-#include "../World/Chunk.h"
+#include "../World/ChunkManager.h"
 
 
 namespace Grove {
@@ -32,7 +32,7 @@ namespace Grove {
 
         // Temp
         std::unique_ptr<Shader> m_Shader;
-        std::unique_ptr<Chunk> m_TestChunk;
+        std::unique_ptr<ChunkManager> m_World;
 
         float m_DeltaTime;
         float m_LastFrame;
