@@ -22,13 +22,13 @@ namespace Grove {
 
         float getMouseXOffset() {
             float temp = m_MouseOffsetX;
-            m_MouseOffsetX = 0;
+            m_MouseOffsetX = 0.0f;
             return temp;
         }
 
         float getMouseYOffset() {
             float temp = m_MouseOffsetY;
-            m_MouseOffsetY;
+            m_MouseOffsetY = 0.0f;
             return temp;
         }
 

@@ -9,7 +9,7 @@ namespace Grove {
         m_LastMouseY = height / 2.0f;
         m_FirstMouse = true;
         m_MouseOffsetX = 0.0f;
-        m_MouseOffsetY = 0.0f
+        m_MouseOffsetY = 0.0f;
     }
 
     Window::~Window() {
@@ -30,13 +30,13 @@ namespace Grove {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-        GLFWwindow* window = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), NULL, NULL);
-        if (window == NULL) {
+        m_Window = glfwCreateWindow(m_Width, m_Height, m_Title.c_str(), NULL, NULL);
+        if (m_Window == NULL) {
             std::cerr << "[ERROR] Failed to create GLFW window" << std::endl;
             glfwTerminate();
             return;
         }
-        glfwMakeContextCurrent(window);
+        glfwMakeContextCurrent(m_Window);
 
         glfwSetWindowUserPointer(m_Window, this);
 
@@ -56,10 +56,6 @@ namespace Grove {
     void Window::update() {
         glfwSwapBuffers(m_Window);
         glfwPollEvents();
-    }
-
-    bool Window::shouldClose() const {
-        return glfwWindowShouldClose(m_Window);
     }
 
     void Window::s_framebufferSizeCallback(GLFWwindow* window, int width, int height) {
