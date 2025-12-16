@@ -57,10 +57,17 @@ namespace Grove {
     void Chunk::addFace(const std::vector<float>& faceVertices, int x, int y, int z, int faceID) {
         unsigned int offset = m_Vertices.size() / 3;
 
+        Voxel voxel = getVoxel(x, y, z);
+        glm::vec3 col = voxel.getNoiseColour(x, y, z);
+
         for (int i = 0; i < 4; i++) {
             m_Vertices.push_back(faceVertices[i * 3] + x);
             m_Vertices.push_back(faceVertices[i * 3 + 1] + y);
             m_Vertices.push_back(faceVertices[i * 3 + 2] + z);
+
+            m_Colours.push_back(col.r);
+            m_Colours.push_back(col.g);
+            m_Colours.push_back(col.b);
         }
 
         m_Indices.push_back(offset + 0);
@@ -75,6 +82,7 @@ namespace Grove {
     void Chunk::generateMesh() {
         m_Vertices.clear();
         m_Indices.clear();
+        m_Colours.clear();
 
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int y = 0; y < CHUNK_SIZE; y++) {
@@ -154,12 +162,15 @@ namespace Grove {
         if (m_MeshDirty) {
             m_VAO->bind();
             m_VBO = std::make_unique<VBO>(m_Vertices);
+            m_ColVBO = std::make_unique<VBO>(m_Colours);
             m_EBO = std::make_unique<EBO>(m_Indices);
 
             m_VAO->linkAttribute(*m_VBO, 0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
+            m_VAO->linkAttribute(*m_ColVBO, 1, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
 
             m_VAO->unbind();
             m_VBO->unbind();
+            m_ColVBO->unbind();
             m_EBO->unbind();
 
             m_MeshDirty = false;

@@ -39,12 +39,14 @@ namespace Grove {
 
         Voxel m_Voxels[CHUNK_VOLUME];
         glm::vec3 m_Position;
+        std::vector<float> m_Colours;
 
         std::vector<float> m_Vertices;
         std::vector<std::uint32_t> m_Indices;
 
         std::unique_ptr<VAO> m_VAO;
         std::unique_ptr<VBO> m_VBO;
+        std::unique_ptr<VBO> m_ColVBO;
         std::unique_ptr<EBO> m_EBO;
 
         bool m_MeshDirty = false;
