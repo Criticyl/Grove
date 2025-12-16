@@ -80,19 +80,19 @@ namespace Grove {
 
     void Window::onMouseMove(double xPos, double yPos) {
         if (m_FirstMouse) {
-            m_LastMouseX = xPos;
-            m_LastMouseY = yPos;
+            m_LastMouseX = (float)xPos;
+            m_LastMouseY = (float)yPos;
             m_FirstMouse = false;
         }
 
-        float xOffset = xPos - m_LastMouseX;
-        float yOffset = m_LastMouseY - yPos;
+        float xOffset = (float) xPos - m_LastMouseX;
+        float yOffset = m_LastMouseY - (float) yPos;
 
-        m_LastMouseX = xPos;
-        m_LastMouseY = yPos;
+        m_LastMouseX = (float) xPos;
+        m_LastMouseY = (float) yPos;
 
-        m_MouseOffsetX = xOffset;
-        m_MouseOffsetY = yOffset;
+        m_MouseOffsetX += xOffset;
+        m_MouseOffsetY += yOffset;
     }
 
 }
