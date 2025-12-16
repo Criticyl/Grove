@@ -22,12 +22,12 @@ This project is designed to be both a showcase and test for efficient rendering 
 
 ### Installation & Build
 *Note: Only tested on Windows so far however this should work for Linux too.*
-1. **Clone the repository**
+#### 1. **Clone the repository**
 ```bash
 git clone https://github.com/Criticyl/Grove.git
 cd grove
 ```
-2. **Build using CMake**
+#### 2. **Build using CMake**
 
 **For Windows:**
 ```bash
@@ -52,7 +52,7 @@ cmake --build .
 ```bash
 ./Grove
 ```
-3. **Installation (Optional)**
+#### 3. **Installation (Optional)**
 If you want to insall Grove to your system path:
 
 **Linux / macOS:**
