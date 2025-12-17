@@ -9,7 +9,7 @@
 namespace Grove {
 
     Chunk::Chunk(glm::vec3 position, FastNoiseLite& terrainNoise, FastNoiseLite& grassNoise, FastNoiseLite& stoneNoise)
-        : m_Position(position), m_GrassNoise(grassNoise), m_StoneNoise(stoneNoise)
+        : m_Position(position), m_TerrainNoise(terrainNoise), m_GrassNoise(grassNoise), m_StoneNoise(stoneNoise)
     {
 
         for (int i = 0; i < CHUNK_VOLUME; i++) {
@@ -21,9 +21,7 @@ namespace Grove {
                 float globalX = m_Position.x + x;
                 float globalZ = m_Position.z + z;
 
-                float noiseValue = terrainNoise.GetNoise(globalX, globalZ);
-                int height = (int)((noiseValue + 1.0f) * 0.5f * 32.0f);
-                if (height < 2) height = 2;
+                int height = getTerrainHeight(globalX, globalZ);
 
                 for (int y = 0; y < height; y++) {
                     int voxelID = (y == height - 1) ? 1 : 2;
@@ -33,6 +31,7 @@ namespace Grove {
             }
         }
 
+        std::cout << "Chunk Pos: " << m_Position.x << std::endl;
         m_VAO = std::make_unique<VAO>();
     }
 
@@ -40,7 +39,19 @@ namespace Grove {
     }
 
     bool Chunk::isAir(int x, int y, int z) const {
-        if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE) return true;
+        if (y < 0) return false;
+        if (y >= CHUNK_SIZE) return true;
+
+        if (x < 0 || x >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE) {
+            int globalX = (int)std::floor(m_Position.x + x);
+            int globalZ = (int)std::floor(m_Position.z + z);
+
+            int height = getTerrainHeight(globalX, globalZ);
+
+            return y >= height;
+
+        }
+
         return getVoxel(x, y, z).isAir();
     }
 
@@ -104,6 +115,15 @@ namespace Grove {
         m_Indices.push_back(offset + 3);
         m_Indices.push_back(offset + 0);
 
+    }
+
+    int Chunk::getTerrainHeight(int globalX, int globalZ) const {
+        float noiseValue = m_TerrainNoise.GetNoise((float)globalX, (float)globalZ);
+        float scaledHeight = (noiseValue + 1.0f) * 0.5f * 32.0f;
+        int height = (int)(scaledHeight + 0.1f);
+        if (height < 2) height = 2;
+
+        return height;
     }
 
     void Chunk::generateMesh() {
@@ -204,11 +224,8 @@ namespace Grove {
 
             m_VAO->bind();
 
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, m_Position);
-
             float scale = 0.2f;
-            model = glm::mat4(1.0f);
+            glm::mat4 model = glm::mat4(1.0f);
             model = glm::translate(model, m_Position * scale);
             model = glm::scale(model, glm::vec3(scale));
 
