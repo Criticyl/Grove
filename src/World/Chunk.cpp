@@ -8,7 +8,7 @@
 
 namespace Grove {
 
-    Chunk::Chunk(glm::vec3 position)
+    Chunk::Chunk(glm::vec3 position, FastNoiseLite& noise)
         : m_Position(position)
     {
 
@@ -18,7 +18,18 @@ namespace Grove {
 
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
-                setVoxel(x, 0, z, 1);
+                float globalX = m_Position.x + x;
+                float globalZ = m_Position.z + z;
+
+                float noiseValue = noise.GetNoise(globalX, globalZ);
+                int height = (int)((noiseValue + 1.0f) * 0.5f * 32.0f);
+                if (height < 2) height = 2;
+
+                for (int y = 0; y < height; y++) {
+                    int voxelID = (y == height - 1) ? 1 : 2;
+                    setVoxel(x, y, z, voxelID);
+                }
+
             }
         }
 
@@ -146,9 +157,6 @@ namespace Grove {
                 }
             }
         }
-
-        std::cout << "Vertices: " << m_Vertices.size() / 3 << std::endl;
-        std::cout << "Indices: " << m_Indices.size() << std::endl;
 
         m_MeshDirty = true;
     }

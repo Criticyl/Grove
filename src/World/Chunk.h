@@ -5,6 +5,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <FastNoiseLite.h>
 
 
 namespace Grove {
@@ -21,7 +22,7 @@ namespace Grove {
 
     class Chunk {
     public:
-        Chunk(glm::vec3 position);
+        Chunk(glm::vec3 position, FastNoiseLite& noise);
         ~Chunk();
 
         void generateMesh();

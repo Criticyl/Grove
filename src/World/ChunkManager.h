@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <glm/glm.hpp>
+#include <FastNoiseLite.h>
 
 #include "Chunk.h"
 #include "../Renderer/Shader.h"
@@ -34,6 +35,7 @@ namespace Grove {
     private:
 
         std::map<ChunkCoord, std::unique_ptr<Chunk>> m_Chunks;
+        FastNoiseLite m_Noise;
 
         void createChunk(int x, int z);
 
