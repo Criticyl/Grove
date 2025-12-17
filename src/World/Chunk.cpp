@@ -8,8 +8,8 @@
 
 namespace Grove {
 
-    Chunk::Chunk(glm::vec3 position, FastNoiseLite& noise)
-        : m_Position(position)
+    Chunk::Chunk(glm::vec3 position, FastNoiseLite& terrainNoise, FastNoiseLite& grassNoise, FastNoiseLite& stoneNoise)
+        : m_Position(position), m_GrassNoise(grassNoise), m_StoneNoise(stoneNoise)
     {
 
         for (int i = 0; i < CHUNK_VOLUME; i++) {
@@ -21,7 +21,7 @@ namespace Grove {
                 float globalX = m_Position.x + x;
                 float globalZ = m_Position.z + z;
 
-                float noiseValue = noise.GetNoise(globalX, globalZ);
+                float noiseValue = terrainNoise.GetNoise(globalX, globalZ);
                 int height = (int)((noiseValue + 1.0f) * 0.5f * 32.0f);
                 if (height < 2) height = 2;
 
@@ -64,7 +64,28 @@ namespace Grove {
         unsigned int offset = m_Vertices.size() / 3;
 
         Voxel voxel = getVoxel(x, y, z);
-        glm::vec3 col = voxel.getNoiseColour(x, y, z);
+        glm::vec3 baseColour = voxel.getBaseColour();
+
+        float globalX = m_Position.x + x;
+        float globalY = m_Position.y + y;
+        float globalZ = m_Position.z + z;
+
+        float noiseValue;
+        switch (voxel.ID) {
+            case 1: 
+                noiseValue = m_GrassNoise.GetNoise(globalX, globalY, globalZ); 
+                break;
+            case 2: 
+                noiseValue = m_StoneNoise.GetNoise(globalX, globalY, globalZ); 
+                break;
+            default:
+                noiseValue = 1.0f;
+                break;
+        }
+
+        float variance = 0.1f;
+        glm::vec3 col = baseColour + (glm::vec3(noiseValue) * variance);
+        col = glm::clamp(col, 0.0f, 1.0f);
 
         for (int i = 0; i < 4; i++) {
             m_Vertices.push_back(faceVertices[i * 3] + x);

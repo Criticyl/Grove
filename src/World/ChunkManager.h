@@ -35,7 +35,9 @@ namespace Grove {
     private:
 
         std::map<ChunkCoord, std::unique_ptr<Chunk>> m_Chunks;
-        FastNoiseLite m_Noise;
+        FastNoiseLite m_TerrainNoise;
+        FastNoiseLite m_GrassNoise;
+        FastNoiseLite m_StoneNoise;
 
         void createChunk(int x, int z);
 

@@ -22,7 +22,7 @@ namespace Grove {
 
     class Chunk {
     public:
-        Chunk(glm::vec3 position, FastNoiseLite& noise);
+        Chunk(glm::vec3 position, FastNoiseLite& terrainNoise, FastNoiseLite& grassNoise, FastNoiseLite& stoneNoise);
         ~Chunk();
 
         void generateMesh();
@@ -44,6 +44,9 @@ namespace Grove {
 
         std::vector<float> m_Vertices;
         std::vector<std::uint32_t> m_Indices;
+
+        FastNoiseLite m_GrassNoise;
+        FastNoiseLite m_StoneNoise;
 
         std::unique_ptr<VAO> m_VAO;
         std::unique_ptr<VBO> m_VBO;
