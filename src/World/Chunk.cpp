@@ -136,8 +136,8 @@ namespace Grove {
 
         if (neighbors == 0) return 1.0f;
         if (neighbors == 1) return 0.8f;
-        if (neighbors == 2) return 0.6f;
-        return 0.4f;
+        if (neighbors == 2) return 0.65f;
+        return 0.5f;
     }
 
     void Chunk::addFace(const std::vector<float>& faceVertices, int x, int y, int z, int faceID) {

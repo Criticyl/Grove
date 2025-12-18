@@ -17,7 +17,7 @@ namespace Grove {
         m_StoneNoise.SetFrequency(0.1f);
         m_StoneNoise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_EuclideanSq);
 
-        int generationRadius = 3;
+        int generationRadius = 7;
 
         for (int x = -generationRadius; x < generationRadius; x++) {
             for (int z = -generationRadius; z < generationRadius; z++) {
