@@ -36,6 +36,7 @@ namespace Grove {
         bool isAir(int x, int y, int z) const;
         void addFace(const std::vector<float>& faceVertices, int x, int y, int z, int faceID);
         int getTerrainHeight(int globalX, int globalZ) const;
+        float calculateVertexAO(bool side1, bool side2, bool corner);
 
     private:
 
@@ -45,6 +46,7 @@ namespace Grove {
 
         std::vector<float> m_Vertices;
         std::vector<std::uint32_t> m_Indices;
+        std::vector<float> m_AO;
 
         FastNoiseLite m_TerrainNoise;
         FastNoiseLite m_GrassNoise;
@@ -53,6 +55,7 @@ namespace Grove {
         std::unique_ptr<VAO> m_VAO;
         std::unique_ptr<VBO> m_VBO;
         std::unique_ptr<VBO> m_ColVBO;
+        std::unique_ptr<VBO> m_AOVBO;
         std::unique_ptr<EBO> m_EBO;
 
         bool m_MeshDirty = false;

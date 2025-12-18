@@ -1,9 +1,11 @@
 #version 460 core
 
 in vec3 vCol;
+in float vAO;
 out vec4 fragColour;
 
 void main()
 {
-    fragColour = vec4(vCol, 1.0);
+    vec3 colour = vCol * vAO;
+    fragColour = vec4(colour, 1.0);
 }

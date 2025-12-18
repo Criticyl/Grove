@@ -17,7 +17,7 @@ add_subdirectory(vendor/glm)
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_executable(Grove)
-target_sources(Grove PRIVATE ${MY_SOURCES} "src/Renderer/Shader.h" "src/Renderer/Shader.cpp" "src/Renderer/VBO.h" "src/Renderer/VBO.cpp" "src/Renderer/EBO.h" "src/Renderer/EBO.cpp" "src/Renderer/VAO.h" "src/Renderer/VAO.cpp" "src/Renderer/Camera.h" "src/Core/Window.h" "src/Core/Window.cpp" "src/Core/Application.h" "src/Core/Application.cpp" "src/World/Voxel.h" "src/World/Chunk.h" "src/World/Chunk.cpp" "src/World/ChunkManager.h" "src/World/ChunkManager.cpp" "vendor/FastNoiseLite/FastNoiseLite.h")
+target_sources(Grove PRIVATE ${MY_SOURCES} "src/Renderer/Shader.h" "src/Renderer/Shader.cpp" "src/Renderer/VBO.h" "src/Renderer/VBO.cpp" "src/Renderer/EBO.h" "src/Renderer/EBO.cpp" "src/Renderer/VAO.h" "src/Renderer/VAO.cpp" "src/Renderer/Camera.h" "src/Core/Window.h" "src/Core/Window.cpp" "src/Core/Application.h" "src/Core/Application.cpp" "src/World/Voxel.h" "src/World/Chunk.h" "src/World/Chunk.cpp" "src/World/ChunkManager.h" "src/World/ChunkManager.cpp" "vendor/FastNoiseLite/FastNoiseLite.h" )
 
 target_include_directories(Grove PUBLIC 
     "${CMAKE_CURRENT_SOURCE_DIR}/include/"
