@@ -17,15 +17,6 @@ namespace Grove {
         m_StoneNoise.SetFrequency(0.1f);
         m_StoneNoise.SetCellularDistanceFunction(FastNoiseLite::CellularDistanceFunction_EuclideanSq);
 
-        int generationRadius = 7;
-
-        for (int x = -generationRadius; x < generationRadius; x++) {
-            for (int z = -generationRadius; z < generationRadius; z++) {
-                createChunk(x, z);
-            }
-        }
-
-        std::cout << "Chunks: " << m_Chunks.size() << std::endl;
     }
 
     ChunkManager::~ChunkManager() {
@@ -42,8 +33,40 @@ namespace Grove {
         m_Chunks[coord]->generateMesh();
     }
 
-    void ChunkManager::update() {
+    void ChunkManager::update(glm::vec3 playerPos) {
+        float chunkWidth = CHUNK_SIZE * VOXEL_SIZE;
 
+        int playerChunkX = static_cast<int>(std::floor(playerPos.x / chunkWidth));
+        int playerChunkZ = static_cast<int>(std::floor(playerPos.z / chunkWidth));
+
+        int chunksBuiltThisFrame = 0;
+
+        for (int x = -RENDER_DISTANCE; x <= RENDER_DISTANCE; x++) {
+            for (int z = -RENDER_DISTANCE; z <= RENDER_DISTANCE; z++) {
+
+                ChunkCoord coord = { playerChunkX + x, playerChunkZ + z };
+                if (m_Chunks.find(coord) == m_Chunks.end()) {
+                    createChunk(coord.x, coord.z);
+                }
+            }
+        }
+
+        for (auto it = m_Chunks.begin(); it != m_Chunks.end(); ) {
+            ChunkCoord coord = it->first;
+
+            float distX = static_cast<float>(coord.x - playerChunkX);
+            float distZ = static_cast<float>(coord.z - playerChunkZ);
+            float dist = std::sqrt(distX * distX + distZ * distZ);
+
+            if (dist > RENDER_DISTANCE + 2) {
+                it = m_Chunks.erase(it);
+            }
+            else {
+                ++it;
+            }
+        }
+
+        std::cout << "Chunks: " << m_Chunks.size() << std::endl;
     }
 
     void ChunkManager::render(Shader& shader) {

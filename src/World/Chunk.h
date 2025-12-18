@@ -17,7 +17,7 @@ namespace Grove {
 
 namespace Grove {
 
-    const int CHUNK_SIZE = 32;
+    const int CHUNK_SIZE = 64;
     const int CHUNK_VOLUME = CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
 
     class Chunk {

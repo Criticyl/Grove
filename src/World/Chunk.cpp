@@ -33,11 +33,9 @@ namespace Grove {
                     int voxelID = (y == height - 1) ? 1 : 2;
                     setVoxel(x, y, z, voxelID);
                 }
-
             }
         }
 
-        std::cout << "Chunk Pos: " << m_Position.x << std::endl;
         m_VAO = std::make_unique<VAO>();
     }
 
@@ -254,6 +252,11 @@ namespace Grove {
         m_Indices.clear();
         m_Colours.clear();
         m_AO.clear();
+
+        m_Vertices.shrink_to_fit();
+        m_Indices.shrink_to_fit();
+        m_Colours.shrink_to_fit();
+        m_AO.shrink_to_fit();
 
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int y = 0; y < CHUNK_SIZE; y++) {

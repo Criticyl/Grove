@@ -79,8 +79,6 @@ namespace Grove {
                     cameraPitch = -89.9f;
             }
 
-            std::cout << "Yaw:" << cameraYaw << "Position: " << cameraPosition.x << " " << cameraPosition.y << " " << cameraPosition.z << std::endl;
-
             updateCameraVec();
         }
 
