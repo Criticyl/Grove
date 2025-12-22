@@ -22,19 +22,7 @@ namespace Grove {
             m_Voxels[i].ID = 0;
         }
 
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            for (int z = 0; z < CHUNK_SIZE; z++) {
-                float globalX = m_Position.x + x;
-                float globalZ = m_Position.z + z;
-
-                int height = getTerrainHeight(globalX, globalZ);
-
-                for (int y = 0; y < height; y++) {
-                    int voxelID = (y == height - 1) ? 1 : 2;
-                    setVoxel(x, y, z, voxelID);
-                }
-            }
-        }
+        generateTerrain();
 
         m_VAO = std::make_unique<VAO>();
     }
@@ -43,18 +31,7 @@ namespace Grove {
     }
 
     bool Chunk::isAir(int x, int y, int z) const {
-        if (y < 0) return false;
-        if (y >= CHUNK_SIZE) return true;
-
-        if (x < 0 || x >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE) {
-            int globalX = (int)std::floor(m_Position.x + x);
-            int globalZ = (int)std::floor(m_Position.z + z);
-
-            int height = getTerrainHeight(globalX, globalZ);
-
-            return y >= height;
-
-        }
+        if (y < 0 || y >= CHUNK_SIZE) return false;
 
         return getVoxel(x, y, z).isAir();
     }
@@ -238,16 +215,51 @@ namespace Grove {
 
     }
 
-    int Chunk::getTerrainHeight(int globalX, int globalZ) const {
-        float noiseValue = m_TerrainNoise.GetNoise((float)globalX, (float)globalZ);
-        float scaledHeight = (noiseValue + 1.0f) * 0.5f * 32.0f;
-        int height = (int)(scaledHeight + 0.1f);
-        if (height < 2) height = 2;
+    void Chunk::generateTerrain() {
+        const float NOISE_SCALE = 1.5f;
+        const float GROUND_BIAS = 0.3f;
 
-        return height;
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            for (int z = 0; z < CHUNK_SIZE; z++) {
+                float globalX = m_Position.x + x;
+                float globalZ = m_Position.z + z;
+
+                for (int y = 0; y < CHUNK_SIZE; y++) {
+                    float globalY = y;
+
+                    if (y > CHUNK_SIZE * 0.7f) {
+                        setVoxel(x, y, z, 0);
+                        continue;
+                    }
+
+                    float noiseValue = m_TerrainNoise.GetNoise(
+                        globalX * NOISE_SCALE,
+                        globalY * NOISE_SCALE,
+                        globalZ * NOISE_SCALE
+                    );
+
+                    float heightGradient = (float)y / CHUNK_SIZE;
+                    float density = (noiseValue * 1.5f) + GROUND_BIAS - heightGradient;
+                    if (density > 0.0f) {
+                        setVoxel(x, y, z, 2);
+                    }
+                    else {
+                        setVoxel(x, y, z, 0);
+                    }
+                    
+                }
+
+                for (int y = CHUNK_SIZE - 1; y > 0; y--) {
+                    if (getVoxel(x, y, z).ID == 0 && getVoxel(x, y - 1, z).ID == 2) {
+                        setVoxel(x, y - 1, z, 1);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
-    void Chunk::generateMesh() {
+    void Chunk::generateMesh(const Chunk* left, const Chunk* right, const Chunk* front, const Chunk* back) {
         m_Vertices.clear();
         m_Indices.clear();
         m_Colours.clear();
@@ -258,12 +270,30 @@ namespace Grove {
         m_Colours.shrink_to_fit();
         m_AO.shrink_to_fit();
 
+        auto isGlobalAir = [&](int glob_x, int glob_y, int glob_z) -> bool {
+            if (glob_y < 0 || glob_y >= CHUNK_SIZE) return true;
+            if (glob_x < 0) {
+                return (left) ? left->isAir(glob_x + CHUNK_SIZE, glob_y, glob_z) : true;
+            }
+            if (glob_x >= CHUNK_SIZE) {
+                return (right) ? right->isAir(glob_x - CHUNK_SIZE, glob_y, glob_z) : true;
+            }
+            if (glob_z < 0) {
+                return (back) ? back->isAir(glob_x, glob_y, glob_z + CHUNK_SIZE) : true;
+            }
+            if (glob_z >= CHUNK_SIZE) {
+                return (front) ? front->isAir(glob_x, glob_y, glob_z - CHUNK_SIZE) : true;
+            }
+
+            return isAir(glob_x, glob_y, glob_z);
+        };
+
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int y = 0; y < CHUNK_SIZE; y++) {
                 for (int z = 0; z < CHUNK_SIZE; z++) {
                     if (isAir(x, y, z)) continue;
 
-                    if (isAir(x + 1, y, z)) {
+                    if (isGlobalAir(x + 1, y, z)) {
                         std::vector<float> face = {
                             0.5f, 0.5f, -0.5f,
                             0.5f, -0.5f, -0.5f,
@@ -273,7 +303,7 @@ namespace Grove {
                         addFace(face, x, y, z, 0);
                     }
 
-                    if (isAir(x - 1, y, z)) {
+                    if (isGlobalAir(x - 1, y, z)) {
                         std::vector<float> face = {
                             -0.5f, 0.5f, 0.5f,
                             -0.5f, -0.5f, 0.5f,
@@ -283,7 +313,7 @@ namespace Grove {
                         addFace(face, x, y, z, 1);
                     }
 
-                    if (isAir(x, y + 1, z)) {
+                    if (isGlobalAir(x, y + 1, z)) {
                         std::vector<float> face = {
                             -0.5f, 0.5f, 0.5f,
                             0.5f, 0.5f, 0.5f,
@@ -293,7 +323,7 @@ namespace Grove {
                         addFace(face, x, y, z, 2);
                     }
 
-                    if (isAir(x, y - 1, z)) {
+                    if (isGlobalAir(x, y - 1, z)) {
                         std::vector<float> face = {
                             -0.5f, -0.5f, -0.5f,
                             0.5f, -0.5f, -0.5f,
@@ -303,7 +333,7 @@ namespace Grove {
                         addFace(face, x, y, z, 3);
                     }
 
-                    if (isAir(x, y, z + 1)) {
+                    if (isGlobalAir(x, y, z + 1)) {
                         std::vector<float> face = {
                             -0.5f, 0.5f, 0.5f,
                             -0.5f, -0.5f, 0.5f,
@@ -313,7 +343,7 @@ namespace Grove {
                         addFace(face, x, y, z, 4);
                     }
 
-                    if (isAir(x, y, z - 1)) {
+                    if (isGlobalAir(x, y, z - 1)) {
                         std::vector<float> face = {
                             0.5f, 0.5f, -0.5f,
                             0.5f, -0.5f, -0.5f,

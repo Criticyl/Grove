@@ -25,7 +25,7 @@ namespace Grove {
         Chunk(glm::vec3 position, FastNoiseLite& terrainNoise, FastNoiseLite& grassNoise, FastNoiseLite& stoneNoise);
         ~Chunk();
 
-        void generateMesh();
+        void generateMesh(const Chunk* left, const Chunk* right, const Chunk* front, const Chunk* back);
         void render(Shader& shader);
 
         Voxel getVoxel(int x, int y, int z) const;
@@ -35,8 +35,9 @@ namespace Grove {
 
         bool isAir(int x, int y, int z) const;
         void addFace(const std::vector<float>& faceVertices, int x, int y, int z, int faceID);
-        int getTerrainHeight(int globalX, int globalZ) const;
+        int getTerrainHeight(int globalX, int globalY, int globalZ) const;
         float calculateVertexAO(bool side1, bool side2, bool corner);
+        void generateTerrain();
 
     private:
 

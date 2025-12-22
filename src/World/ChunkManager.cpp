@@ -6,6 +6,10 @@ namespace Grove {
 
         m_TerrainNoise.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
         m_TerrainNoise.SetSeed(12);
+        m_TerrainNoise.SetFractalType(FastNoiseLite::FractalType_Ridged);
+        m_TerrainNoise.SetFractalOctaves(4);
+        m_TerrainNoise.SetFractalLacunarity(2.0f);
+        m_TerrainNoise.SetFractalGain(0.5f);
         m_TerrainNoise.SetFrequency(0.003f);
 
         m_GrassNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
@@ -23,6 +27,12 @@ namespace Grove {
         m_Chunks.clear();
     }
 
+    Chunk* ChunkManager::getChunkPtr(int x, int z) {
+        auto it = m_Chunks.find({ x, z });
+        if (it != m_Chunks.end()) return it->second.get();
+        return nullptr;
+    }
+
     void ChunkManager::createChunk(int x, int z) {
         ChunkCoord coord = { x, z };
 
@@ -30,7 +40,23 @@ namespace Grove {
         float worldZ = z * CHUNK_SIZE;
 
         m_Chunks[coord] = std::make_unique<Chunk>(glm::vec3(worldX, 0.0f, worldZ), m_TerrainNoise, m_GrassNoise, m_StoneNoise);
-        m_Chunks[coord]->generateMesh();
+        updateChunk(x, z);
+        if (getChunkPtr(x - 1, z)) updateChunk(x - 1, z);
+        if (getChunkPtr(x + 1, z)) updateChunk(x + 1, z);
+        if (getChunkPtr(x, z - 1)) updateChunk(x, z - 1);
+        if (getChunkPtr(x, z + 1)) updateChunk(x, z + 1);
+    }
+
+    void ChunkManager::updateChunk(int x, int z) {
+        Chunk* chunk = getChunkPtr(x, z);
+        if (!chunk) return;
+
+        Chunk* left = getChunkPtr(x - 1, z);
+        Chunk* right = getChunkPtr(x + 1, z);
+        Chunk* back = getChunkPtr(x, z - 1);
+        Chunk* front = getChunkPtr(x, z + 1);
+
+        chunk->generateMesh(left, right, front, back);
     }
 
     void ChunkManager::update(glm::vec3 playerPos) {

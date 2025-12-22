@@ -26,12 +26,13 @@ namespace Grove {
         ~ChunkManager();
 
         void update(glm::vec3 playerPos);
+        void updateChunk(int x, int z);
         void render(Shader& shader);
 
     public:
 
         const float VOXEL_SIZE = 0.2f;
-        const int RENDER_DISTANCE = 8;
+        const int RENDER_DISTANCE = 3;
 
 
     private:
@@ -42,6 +43,7 @@ namespace Grove {
         FastNoiseLite m_StoneNoise;
 
         void createChunk(int x, int z);
+        Chunk* getChunkPtr(int x, int z);
 
     };
 }
