@@ -62,10 +62,10 @@ namespace Grove {
         }
 
         if (faceID == 3) {
-            if (vertexIndex == 0) return { {-1, -1, 0}, {0, -1, 1}, {-1, -1, 1} };
-            if (vertexIndex == 1) return { {1, -1, 0}, {0, -1, 1}, {1, -1, 1} };
-            if (vertexIndex == 2) return { {1, -1, 0}, {0, -1, -1}, {1, -1, -1} };
-            if (vertexIndex == 3) return { {-1, -1, 0}, {0, -1, -1}, {-1, -1, -1} };
+            if (vertexIndex == 0) return { {-1, -1, 0}, {0, -1, -1}, {-1, -1, -1} };
+            if (vertexIndex == 1) return { {1, -1, 0}, {0, -1, -1}, {1, -1, -1} };
+            if (vertexIndex == 2) return { {1, -1, 0}, {0, -1, 1}, {1, -1, 1} };
+            if (vertexIndex == 3) return { {-1, -1, 0}, {0, -1, 1}, {-1, -1, 1} };
         }
 
         if (faceID == 0) {
