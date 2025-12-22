@@ -5,6 +5,10 @@ namespace Grove {
         glGenVertexArrays(1, &ID);
     }
 
+    VAO::~VAO() {
+        glDeleteVertexArrays(1, &ID);
+    }
+
     void VAO::linkAttribute(VBO& vbo, unsigned int layout, unsigned int numComponents, unsigned int type, int stride, void* offset) {
         vbo.bind();
 

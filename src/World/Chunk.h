@@ -43,11 +43,6 @@ namespace Grove {
 
         Voxel m_Voxels[CHUNK_VOLUME];
         glm::vec3 m_Position;
-        std::vector<float> m_Colours;
-
-        std::vector<float> m_Vertices;
-        std::vector<std::uint32_t> m_Indices;
-        std::vector<float> m_AO;
 
         FastNoiseLite m_TerrainNoise;
         FastNoiseLite m_GrassNoise;
@@ -59,6 +54,6 @@ namespace Grove {
         std::unique_ptr<VBO> m_AOVBO;
         std::unique_ptr<EBO> m_EBO;
 
-        bool m_MeshDirty = false;
+        unsigned int m_IndexCount = 0;
     };
 }

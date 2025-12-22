@@ -8,6 +8,10 @@ namespace Grove {
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
     }
 
+    VBO::~VBO() {
+        glDeleteBuffers(1, &ID);
+    }
+
     void VBO::bind() {
         glBindBuffer(GL_ARRAY_BUFFER, ID);
     }

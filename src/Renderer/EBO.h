@@ -12,6 +12,7 @@ namespace Grove {
     public:
 
         EBO(std::vector<std::uint32_t>& indices);
+        ~EBO();
 
         void bind();
         void unbind();

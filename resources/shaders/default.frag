@@ -13,5 +13,6 @@ void main()
     vec3 finalVertexCol = vCol * curveAO;
     
     vec3 outColour = mix(skyColour, finalVertexCol, vVisibility);
+
     fragColour = vec4(outColour, 1.0);
 }

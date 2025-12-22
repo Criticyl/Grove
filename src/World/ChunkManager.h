@@ -3,6 +3,8 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <deque>
+#include <set>
 #include <glm/glm.hpp>
 #include <FastNoiseLite.h>
 
@@ -25,19 +27,21 @@ namespace Grove {
         ChunkManager();
         ~ChunkManager();
 
-        void update(glm::vec3 playerPos);
+        void update(glm::vec3 playerPos, int workSize);
         void updateChunk(int x, int z);
         void render(Shader& shader);
 
     public:
 
         const float VOXEL_SIZE = 0.2f;
-        const int RENDER_DISTANCE = 3;
+        const int RENDER_DISTANCE = 8;
 
 
     private:
 
         std::map<ChunkCoord, std::unique_ptr<Chunk>> m_Chunks;
+        std::deque<ChunkCoord> m_MeshQueue;
+        std::set<ChunkCoord> m_MeshQueueSet;
         FastNoiseLite m_TerrainNoise;
         FastNoiseLite m_GrassNoise;
         FastNoiseLite m_StoneNoise;

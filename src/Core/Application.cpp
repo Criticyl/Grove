@@ -21,6 +21,8 @@ namespace Grove {
 
     void Application::run() {
 
+        m_World->update(m_Camera->cameraPosition, 1000);
+
         while (!(m_Window->shouldClose())) {
             float currentFrame = static_cast<float>(glfwGetTime());
             m_DeltaTime = currentFrame - m_LastFrame;
@@ -59,7 +61,7 @@ namespace Grove {
 
     void Application::onUpdate(float deltaTime) {
         //Game ticking stuff
-        m_World->update(m_Camera->cameraPosition);
+        m_World->update(m_Camera->cameraPosition, 1);
     }
 
     void Application::onRender() {

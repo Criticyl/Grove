@@ -48,24 +48,23 @@ namespace Grove {
     }
 
     void ChunkManager::updateChunk(int x, int z) {
-        Chunk* chunk = getChunkPtr(x, z);
-        if (!chunk) return;
+        ChunkCoord coord = { x, z };
 
-        Chunk* left = getChunkPtr(x - 1, z);
-        Chunk* right = getChunkPtr(x + 1, z);
-        Chunk* back = getChunkPtr(x, z - 1);
-        Chunk* front = getChunkPtr(x, z + 1);
-
-        chunk->generateMesh(left, right, front, back);
+        if (m_MeshQueueSet.find(coord) == m_MeshQueueSet.end()) {
+            m_MeshQueue.push_back(coord);
+            m_MeshQueueSet.insert(coord);
+        }
+        
     }
 
-    void ChunkManager::update(glm::vec3 playerPos) {
+    void ChunkManager::update(glm::vec3 playerPos, int workSize = 1) {
         float chunkWidth = CHUNK_SIZE * VOXEL_SIZE;
 
         int playerChunkX = static_cast<int>(std::floor(playerPos.x / chunkWidth));
         int playerChunkZ = static_cast<int>(std::floor(playerPos.z / chunkWidth));
 
         int chunksBuiltThisFrame = 0;
+        const int MAX_CREATIONS_PER_FRAME = workSize;
 
         for (int x = -RENDER_DISTANCE; x <= RENDER_DISTANCE; x++) {
             for (int z = -RENDER_DISTANCE; z <= RENDER_DISTANCE; z++) {
@@ -73,9 +72,37 @@ namespace Grove {
                 ChunkCoord coord = { playerChunkX + x, playerChunkZ + z };
                 if (m_Chunks.find(coord) == m_Chunks.end()) {
                     createChunk(coord.x, coord.z);
+
+                    chunksBuiltThisFrame++;
+                    if (chunksBuiltThisFrame >= MAX_CREATIONS_PER_FRAME) {
+                        goto STOP_CHUNK_CREATION;
+                    }
                 }
             }
         }
+    STOP_CHUNK_CREATION:
+        int meshesBuilt = 0;
+        const int MAX_MESHES_PER_FRAME = 2;
+
+        while (!m_MeshQueue.empty() && meshesBuilt < MAX_MESHES_PER_FRAME) {
+            ChunkCoord coord = m_MeshQueue.front();
+            m_MeshQueue.pop_front();
+            m_MeshQueueSet.erase(coord);
+
+            Chunk* chunk = getChunkPtr(coord.x, coord.z);
+            if (chunk) {
+                Chunk* left = getChunkPtr(coord.x - 1, coord.z);
+                Chunk* right = getChunkPtr(coord.x + 1, coord.z);
+                Chunk* back = getChunkPtr(coord.x, coord.z - 1);
+                Chunk* front = getChunkPtr(coord.x, coord.z + 1);
+
+                chunk->generateMesh(left, right, front, back);
+                meshesBuilt++;
+            }
+        }
+
+
+
 
         for (auto it = m_Chunks.begin(); it != m_Chunks.end(); ) {
             ChunkCoord coord = it->first;

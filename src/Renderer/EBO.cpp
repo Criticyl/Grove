@@ -7,6 +7,10 @@ namespace Grove {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(std::uint32_t), indices.data(), GL_STATIC_DRAW);
     }
 
+    EBO::~EBO() {
+        glDeleteBuffers(1, &ID);
+    }
+
     void EBO::bind() {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ID);
     }

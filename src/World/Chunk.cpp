@@ -115,7 +115,7 @@ namespace Grove {
         return 0.5f;
     }
 
-    void Chunk::addFace(const std::vector<float>& faceVertices, int x, int y, int z, int faceID) {
+    /*void Chunk::addFace(const std::vector<float>& faceVertices, int x, int y, int z, int faceID) {
         unsigned int offset = m_Vertices.size() / 3;
 
         Voxel voxel = getVoxel(x, y, z);
@@ -171,7 +171,7 @@ namespace Grove {
                 m_Colours.push_back(1.0f);
                 m_Colours.push_back(0.0f);
                 m_Colours.push_back(1.0f);
-            }*/
+            }
 
 
             AONeighbours n = getAONeighbors(faceID, i);
@@ -213,7 +213,7 @@ namespace Grove {
 
        
 
-    }
+    }*/
 
     void Chunk::generateTerrain() {
         const float NOISE_SCALE = 1.5f;
@@ -260,15 +260,83 @@ namespace Grove {
     }
 
     void Chunk::generateMesh(const Chunk* left, const Chunk* right, const Chunk* front, const Chunk* back) {
-        m_Vertices.clear();
-        m_Indices.clear();
-        m_Colours.clear();
-        m_AO.clear();
+        std::vector<float> vertices;
+        std::vector<unsigned int> indices;
+        std::vector<float> colours;
+        std::vector<float> ao;
+        
+        auto addFace = [&](int x, int y, int z, int faceID) {
+            unsigned int offset = vertices.size() / 3;
+            std::vector<float> faceVertices;
 
-        m_Vertices.shrink_to_fit();
-        m_Indices.shrink_to_fit();
-        m_Colours.shrink_to_fit();
-        m_AO.shrink_to_fit();
+            if (faceID == 0) faceVertices = { 0.5f, 0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f };
+            if (faceID == 1) faceVertices = { -0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f, -0.5f };
+            if (faceID == 2) faceVertices = { -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f };
+            if (faceID == 3) faceVertices = { -0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f };
+            if (faceID == 4) faceVertices = { -0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f };
+            if (faceID == 5) faceVertices = { 0.5f, 0.5f, -0.5f, 0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f, -0.5f };
+
+            Voxel voxel = getVoxel(x, y, z);
+            glm::vec3 baseColour = voxel.getBaseColour();
+
+            float globalX = m_Position.x + x;
+            float globalY = m_Position.y + y;
+            float globalZ = m_Position.z + z;
+
+            float noiseValue = 1.0f;
+            if (voxel.ID == 1) noiseValue = m_GrassNoise.GetNoise(globalX, globalY, globalZ);
+            if (voxel.ID == 2) noiseValue = m_StoneNoise.GetNoise(globalX, globalY, globalZ);
+
+            float variance = 0.1f;
+            glm::vec3 col = baseColour + (glm::vec3(noiseValue) * variance);
+            col = glm::clamp(col, 0.0f, 1.0f);
+
+            for (int i = 0; i < 4; i++) {
+
+                vertices.push_back(faceVertices[i * 3] + x);
+                vertices.push_back(faceVertices[i * 3 + 1] + y);
+                vertices.push_back(faceVertices[i * 3 + 2] + z);
+
+                colours.push_back(col.r);
+                colours.push_back(col.g);
+                colours.push_back(col.b);
+
+                AONeighbours n = getAONeighbors(faceID, i);
+
+                bool side1 = !isAir(x + n.s1[0], y + n.s1[1], z + n.s1[2]);
+                bool side2 = !isAir(x + n.s2[0], y + n.s2[1], z + n.s2[2]);
+                bool corner = !isAir(x + n.c[0], y + n.c[1], z + n.c[2]);
+
+                float v_ao = calculateVertexAO(side1, side2, corner);
+                ao.push_back(v_ao);
+            }
+
+            float ao0 = ao[offset + 0];
+            float ao1 = ao[offset + 1];
+            float ao2 = ao[offset + 2];
+            float ao3 = ao[offset + 3];
+
+            float dist1 = abs(ao0 - ao2);
+            float dist2 = abs(ao1 - ao3);
+
+            if (dist1 > dist2) {
+                indices.push_back(offset + 1);
+                indices.push_back(offset + 2);
+                indices.push_back(offset + 3);
+                indices.push_back(offset + 3);
+                indices.push_back(offset + 0);
+                indices.push_back(offset + 1);
+            }
+            else {
+                indices.push_back(offset + 0);
+                indices.push_back(offset + 1);
+                indices.push_back(offset + 2);
+                indices.push_back(offset + 2);
+                indices.push_back(offset + 3);
+                indices.push_back(offset + 0);
+            }
+
+        };
 
         auto isGlobalAir = [&](int glob_x, int glob_y, int glob_z) -> bool {
             if (glob_y < 0 || glob_y >= CHUNK_SIZE) return true;
@@ -293,79 +361,22 @@ namespace Grove {
                 for (int z = 0; z < CHUNK_SIZE; z++) {
                     if (isAir(x, y, z)) continue;
 
-                    if (isGlobalAir(x + 1, y, z)) {
-                        std::vector<float> face = {
-                            0.5f, 0.5f, -0.5f,
-                            0.5f, -0.5f, -0.5f,
-                            0.5f, -0.5f, 0.5f,
-                            0.5f, 0.5f, 0.5f
-                        };
-                        addFace(face, x, y, z, 0);
-                    }
-
-                    if (isGlobalAir(x - 1, y, z)) {
-                        std::vector<float> face = {
-                            -0.5f, 0.5f, 0.5f,
-                            -0.5f, -0.5f, 0.5f,
-                            -0.5f, -0.5f, -0.5f,
-                            -0.5f, 0.5f, -0.5f
-                        };
-                        addFace(face, x, y, z, 1);
-                    }
-
-                    if (isGlobalAir(x, y + 1, z)) {
-                        std::vector<float> face = {
-                            -0.5f, 0.5f, 0.5f,
-                            0.5f, 0.5f, 0.5f,
-                            0.5f, 0.5f, -0.5f,
-                            -0.5f, 0.5f, -0.5f
-                        };
-                        addFace(face, x, y, z, 2);
-                    }
-
-                    if (isGlobalAir(x, y - 1, z)) {
-                        std::vector<float> face = {
-                            -0.5f, -0.5f, -0.5f,
-                            0.5f, -0.5f, -0.5f,
-                            0.5f, -0.5f, 0.5f,
-                            -0.5f, -0.5f, 0.5f
-                        };
-                        addFace(face, x, y, z, 3);
-                    }
-
-                    if (isGlobalAir(x, y, z + 1)) {
-                        std::vector<float> face = {
-                            -0.5f, 0.5f, 0.5f,
-                            -0.5f, -0.5f, 0.5f,
-                            0.5f, -0.5f, 0.5f,
-                            0.5f, 0.5f, 0.5f
-                        };
-                        addFace(face, x, y, z, 4);
-                    }
-
-                    if (isGlobalAir(x, y, z - 1)) {
-                        std::vector<float> face = {
-                            0.5f, 0.5f, -0.5f,
-                            0.5f, -0.5f, -0.5f,
-                            -0.5f, -0.5f, -0.5f,
-                            -0.5f, 0.5f, -0.5f
-                        };
-                        addFace(face, x, y, z, 5);
-                    }
+                    if (isGlobalAir(x + 1, y, z)) addFace(x, y, z, 0);
+                    if (isGlobalAir(x - 1, y, z)) addFace(x, y, z, 1);
+                    if (isGlobalAir(x, y + 1, z)) addFace(x, y, z, 2);
+                    if (isGlobalAir(x, y - 1, z)) addFace(x, y, z, 3);
+                    if (isGlobalAir(x, y, z + 1)) addFace(x, y, z, 4);
+                    if (isGlobalAir(x, y, z - 1)) addFace(x, y, z, 5);
                 }
             }
         }
 
-        m_MeshDirty = true;
-    }
-
-    void Chunk::render(Shader& shader) {
-        if (m_MeshDirty) {
+        if (!indices.empty()) {
             m_VAO->bind();
-            m_VBO = std::make_unique<VBO>(m_Vertices);
-            m_ColVBO = std::make_unique<VBO>(m_Colours);
-            m_AOVBO = std::make_unique<VBO>(m_AO);
-            m_EBO = std::make_unique<EBO>(m_Indices);
+            m_VBO = std::make_unique<VBO>(vertices);
+            m_ColVBO = std::make_unique<VBO>(colours);
+            m_AOVBO = std::make_unique<VBO>(ao);
+            m_EBO = std::make_unique<EBO>(indices);
 
             m_VAO->linkAttribute(*m_VBO, 0, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
             m_VAO->linkAttribute(*m_ColVBO, 1, 3, GL_FLOAT, 3 * sizeof(float), (void*)0);
@@ -376,11 +387,14 @@ namespace Grove {
             m_ColVBO->unbind();
             m_AOVBO->unbind();
             m_EBO->unbind();
-
-            m_MeshDirty = false;
         }
 
-        if (m_Indices.size() > 0) {
+        m_IndexCount = indices.size();
+    }
+
+    void Chunk::render(Shader& shader) {
+
+        if (m_IndexCount > 0) {
 
             m_VAO->bind();
 
@@ -391,7 +405,8 @@ namespace Grove {
 
             shader.setMat4("model", model);
 
-            glDrawElements(GL_TRIANGLES, m_Indices.size(), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, m_IndexCount, GL_UNSIGNED_INT, 0);
+            m_VAO->unbind();
         }
     }
 }

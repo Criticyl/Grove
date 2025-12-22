@@ -11,6 +11,7 @@ namespace Grove {
     public:
 
         VBO(std::vector<float>& vertices);
+        ~VBO();
 
         void bind();
         void unbind();

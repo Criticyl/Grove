@@ -11,6 +11,7 @@ namespace Grove {
     public:
 
         VAO();
+        ~VAO();
 
         void linkAttribute(VBO& vbo, unsigned int layout, unsigned int numComponents, unsigned int type, int stride, void* offset);
 
