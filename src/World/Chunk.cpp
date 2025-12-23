@@ -164,17 +164,19 @@ namespace Grove {
         std::vector<unsigned int> indices;
         std::vector<float> colours;
         std::vector<float> ao;
+
+        //Faces are in order 0-5
+        const float faceVertices[6][12] = {
+            { 0.5f, 0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f },
+            { -0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f, -0.5f },
+            { -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f },
+            { -0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f },
+            { -0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f },
+            { 0.5f, 0.5f, -0.5f, 0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f, -0.5f }
+        };
         
         auto addFace = [&](int x, int y, int z, int faceID) {
             unsigned int offset = vertices.size() / 3;
-            std::vector<float> faceVertices;
-
-            if (faceID == 0) faceVertices = { 0.5f, 0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f };
-            if (faceID == 1) faceVertices = { -0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f, -0.5f };
-            if (faceID == 2) faceVertices = { -0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f };
-            if (faceID == 3) faceVertices = { -0.5f, -0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f };
-            if (faceID == 4) faceVertices = { -0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f };
-            if (faceID == 5) faceVertices = { 0.5f, 0.5f, -0.5f, 0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f, -0.5f };
 
             Voxel voxel = getVoxel(x, y, z);
             glm::vec3 baseColour = voxel.getBaseColour();
@@ -193,9 +195,9 @@ namespace Grove {
 
             for (int i = 0; i < 4; i++) {
 
-                vertices.push_back(faceVertices[i * 3] + x);
-                vertices.push_back(faceVertices[i * 3 + 1] + y);
-                vertices.push_back(faceVertices[i * 3 + 2] + z);
+                vertices.push_back(faceVertices[faceID][i * 3] + x);
+                vertices.push_back(faceVertices[faceID][i * 3 + 1] + y);
+                vertices.push_back(faceVertices[faceID][i * 3 + 2] + z);
 
                 colours.push_back(col.r);
                 colours.push_back(col.g);
