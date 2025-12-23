@@ -39,7 +39,9 @@ namespace Grove {
         float worldX = x * CHUNK_SIZE;
         float worldZ = z * CHUNK_SIZE;
 
-        m_Chunks[coord] = std::make_unique<Chunk>(glm::vec3(worldX, 0.0f, worldZ), m_TerrainNoise, m_GrassNoise, m_StoneNoise);
+        std::unique_ptr<Chunk> newChunk = std::make_unique<Chunk>(glm::vec3(worldX, 0.0f, worldZ), m_TerrainNoise, m_GrassNoise, m_StoneNoise);
+
+        m_Chunks[coord] = std::move(newChunk);
         updateChunk(x, z);
         if (getChunkPtr(x - 1, z)) updateChunk(x - 1, z);
         if (getChunkPtr(x + 1, z)) updateChunk(x + 1, z);
@@ -63,8 +65,9 @@ namespace Grove {
         int playerChunkX = static_cast<int>(std::floor(playerPos.x / chunkWidth));
         int playerChunkZ = static_cast<int>(std::floor(playerPos.z / chunkWidth));
 
+        int maxChunkCreations = (workSize > 0) ? workSize : 1;
+        int maxMeshes = (workSize > 0) ? workSize : 2;
         int chunksBuiltThisFrame = 0;
-        const int MAX_CREATIONS_PER_FRAME = workSize;
 
         for (int x = -RENDER_DISTANCE; x <= RENDER_DISTANCE; x++) {
             for (int z = -RENDER_DISTANCE; z <= RENDER_DISTANCE; z++) {
@@ -74,13 +77,14 @@ namespace Grove {
                     createChunk(coord.x, coord.z);
 
                     chunksBuiltThisFrame++;
-                    if (chunksBuiltThisFrame >= MAX_CREATIONS_PER_FRAME) {
+                    if (chunksBuiltThisFrame >= maxChunkCreations) {
                         goto STOP_CHUNK_CREATION;
                     }
                 }
             }
         }
-    STOP_CHUNK_CREATION:
+
+        STOP_CHUNK_CREATION:
         int meshesBuilt = 0;
         const int MAX_MESHES_PER_FRAME = 2;
 
@@ -101,17 +105,13 @@ namespace Grove {
             }
         }
 
-
-
-
         for (auto it = m_Chunks.begin(); it != m_Chunks.end(); ) {
             ChunkCoord coord = it->first;
 
             float distX = static_cast<float>(coord.x - playerChunkX);
             float distZ = static_cast<float>(coord.z - playerChunkZ);
-            float dist = std::sqrt(distX * distX + distZ * distZ);
 
-            if (dist > RENDER_DISTANCE + 2) {
+            if(std::abs(distX) > RENDER_DISTANCE + 2 || std::abs(distZ) > RENDER_DISTANCE + 2) {
                 it = m_Chunks.erase(it);
             }
             else {
@@ -119,7 +119,7 @@ namespace Grove {
             }
         }
 
-        std::cout << "Chunks: " << m_Chunks.size() << std::endl;
+        //std::cout << "Chunks: " << m_Chunks.size() << std::endl;
     }
 
     void ChunkManager::render(Shader& shader) {

@@ -115,106 +115,6 @@ namespace Grove {
         return 0.5f;
     }
 
-    /*void Chunk::addFace(const std::vector<float>& faceVertices, int x, int y, int z, int faceID) {
-        unsigned int offset = m_Vertices.size() / 3;
-
-        Voxel voxel = getVoxel(x, y, z);
-        glm::vec3 baseColour = voxel.getBaseColour();
-
-        float globalX = m_Position.x + x;
-        float globalY = m_Position.y + y;
-        float globalZ = m_Position.z + z;
-
-        float noiseValue;
-        switch (voxel.ID) {
-            case 1: 
-                noiseValue = m_GrassNoise.GetNoise(globalX, globalY, globalZ); 
-                break;
-            case 2: 
-                noiseValue = m_StoneNoise.GetNoise(globalX, globalY, globalZ); 
-                break;
-            default:
-                noiseValue = 1.0f;
-                break;
-        }
-
-        float variance = 0.1f;
-        glm::vec3 col = baseColour + (glm::vec3(noiseValue) * variance);
-        col = glm::clamp(col, 0.0f, 1.0f);
-
-        for (int i = 0; i < 4; i++) {
-
-
-            m_Vertices.push_back(faceVertices[i * 3] + x);
-            m_Vertices.push_back(faceVertices[i * 3 + 1] + y);
-            m_Vertices.push_back(faceVertices[i * 3 + 2] + z);
-
-            m_Colours.push_back(col.r);
-            m_Colours.push_back(col.g);
-            m_Colours.push_back(col.b);
-            /*if (i == 0) {
-                m_Colours.push_back(1.0f); 
-                m_Colours.push_back(0.0f);
-                m_Colours.push_back(0.0f);
-            }
-            if (i == 1) {
-                m_Colours.push_back(0.0f);
-                m_Colours.push_back(1.0f);
-                m_Colours.push_back(0.0f);
-            }
-            if (i == 2) {
-                m_Colours.push_back(0.0f);
-                m_Colours.push_back(0.0f);
-                m_Colours.push_back(1.0f);
-            }
-            if (i == 3) {
-                m_Colours.push_back(1.0f);
-                m_Colours.push_back(0.0f);
-                m_Colours.push_back(1.0f);
-            }
-
-
-            AONeighbours n = getAONeighbors(faceID, i);
-
-            // 2. Check Solids (!isAir)
-            bool side1 = !isAir(x + n.s1[0], y + n.s1[1], z + n.s1[2]);
-            bool side2 = !isAir(x + n.s2[0], y + n.s2[1], z + n.s2[2]);
-            bool corner = !isAir(x + n.c[0], y + n.c[1], z + n.c[2]);
-
-            float ao = calculateVertexAO(side1, side2, corner);
-            m_AO.push_back(ao);
-
-        }
-
-        float ao0 = m_AO[offset + 0];
-        float ao1 = m_AO[offset + 1];
-        float ao2 = m_AO[offset + 2];
-        float ao3 = m_AO[offset + 3];
-
-        float dist1 = abs(ao0 - ao2);
-        float dist2 = abs(ao1 - ao3);
-
-        if (dist1 > dist2) {
-            m_Indices.push_back(offset + 1);
-            m_Indices.push_back(offset + 2);
-            m_Indices.push_back(offset + 3);
-            m_Indices.push_back(offset + 3);
-            m_Indices.push_back(offset + 0);
-            m_Indices.push_back(offset + 1);
-        }
-        else {
-            m_Indices.push_back(offset + 0);
-            m_Indices.push_back(offset + 1);
-            m_Indices.push_back(offset + 2);
-            m_Indices.push_back(offset + 2);
-            m_Indices.push_back(offset + 3);
-            m_Indices.push_back(offset + 0);
-        }
-
-       
-
-    }*/
-
     void Chunk::generateTerrain() {
         const float NOISE_SCALE = 1.5f;
         const float GROUND_BIAS = 0.3f;
@@ -360,7 +260,6 @@ namespace Grove {
             for (int y = 0; y < CHUNK_SIZE; y++) {
                 for (int z = 0; z < CHUNK_SIZE; z++) {
                     if (isAir(x, y, z)) continue;
-
                     if (isGlobalAir(x + 1, y, z)) addFace(x, y, z, 0);
                     if (isGlobalAir(x - 1, y, z)) addFace(x, y, z, 1);
                     if (isGlobalAir(x, y + 1, z)) addFace(x, y, z, 2);

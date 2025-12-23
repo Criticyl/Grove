@@ -34,8 +34,6 @@ namespace Grove {
     private:
 
         bool isAir(int x, int y, int z) const;
-        void addFace(const std::vector<float>& faceVertices, int x, int y, int z, int faceID);
-        int getTerrainHeight(int globalX, int globalY, int globalZ) const;
         float calculateVertexAO(bool side1, bool side2, bool corner);
         void generateTerrain();
 
