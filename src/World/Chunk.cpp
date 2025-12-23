@@ -119,18 +119,17 @@ namespace Grove {
         const float NOISE_SCALE = 1.5f;
         const float GROUND_BIAS = 0.3f;
 
-        for (int x = 0; x < CHUNK_SIZE; x++) {
-            for (int z = 0; z < CHUNK_SIZE; z++) {
-                float globalX = m_Position.x + x;
-                float globalZ = m_Position.z + z;
+        for (int z = 0; z < CHUNK_SIZE; z++) {
+            float globalZ = m_Position.z + z;
+            for (int y = 0; y < CHUNK_SIZE; y++) {
+                float globalY = y;
 
-                for (int y = 0; y < CHUNK_SIZE; y++) {
-                    float globalY = y;
+                if (y > CHUNK_SIZE * 0.7f) {
+                    continue;
+                }
 
-                    if (y > CHUNK_SIZE * 0.7f) {
-                        setVoxel(x, y, z, 0);
-                        continue;
-                    }
+                for (int x = 0; x < CHUNK_SIZE; x++) {
+                    float globalX = m_Position.x + x;
 
                     float noiseValue = m_TerrainNoise.GetNoise(
                         globalX * NOISE_SCALE,
@@ -149,6 +148,11 @@ namespace Grove {
                     
                 }
 
+            }
+        }
+
+        for (int x = 0; x < CHUNK_SIZE; x++) {
+            for (int z = 0; z < CHUNK_SIZE; z++) {
                 for (int y = CHUNK_SIZE - 1; y > 0; y--) {
                     if (getVoxel(x, y, z).ID == 0 && getVoxel(x, y - 1, z).ID == 2) {
                         setVoxel(x, y - 1, z, 1);
@@ -164,6 +168,11 @@ namespace Grove {
         std::vector<unsigned int> indices;
         std::vector<float> colours;
         std::vector<float> ao;
+
+        vertices.reserve(24000);
+        indices.reserve(36000);
+        colours.reserve(24000);
+        ao.reserve(8000);
 
         //Faces are in order 0-5
         const float faceVertices[6][12] = {
