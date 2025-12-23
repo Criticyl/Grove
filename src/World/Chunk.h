@@ -18,11 +18,12 @@ namespace Grove {
 namespace Grove {
 
     const int CHUNK_SIZE = 64;
-    const int CHUNK_VOLUME = CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
+    const int CHUNK_HEIGHT = 128;
+    const int CHUNK_VOLUME = CHUNK_SIZE * CHUNK_HEIGHT * CHUNK_SIZE;
 
     class Chunk {
     public:
-        Chunk(glm::vec3 position, FastNoiseLite& terrainNoise, FastNoiseLite& grassNoise, FastNoiseLite& stoneNoise);
+        Chunk(glm::vec3 position, FastNoiseLite& terrainNoise, FastNoiseLite& grassNoise, FastNoiseLite& stoneNoise, FastNoiseLite& continentNoise);
         ~Chunk();
 
         void generateMesh(const Chunk* left, const Chunk* right, const Chunk* front, const Chunk* back);
@@ -45,6 +46,7 @@ namespace Grove {
         FastNoiseLite m_TerrainNoise;
         FastNoiseLite m_GrassNoise;
         FastNoiseLite m_StoneNoise;
+        FastNoiseLite m_ContinentNoise;
 
         std::unique_ptr<VAO> m_VAO;
         std::unique_ptr<VBO> m_VBO;

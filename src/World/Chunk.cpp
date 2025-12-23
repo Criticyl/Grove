@@ -14,8 +14,8 @@ namespace Grove {
         int c[3];
     };
 
-    Chunk::Chunk(glm::vec3 position, FastNoiseLite& terrainNoise, FastNoiseLite& grassNoise, FastNoiseLite& stoneNoise)
-        : m_Position(position), m_TerrainNoise(terrainNoise), m_GrassNoise(grassNoise), m_StoneNoise(stoneNoise)
+    Chunk::Chunk(glm::vec3 position, FastNoiseLite& terrainNoise, FastNoiseLite& grassNoise, FastNoiseLite& stoneNoise, FastNoiseLite& continentNoise)
+        : m_Position(position), m_TerrainNoise(terrainNoise), m_GrassNoise(grassNoise), m_StoneNoise(stoneNoise), m_ContinentNoise(continentNoise)
     {
 
         for (int i = 0; i < CHUNK_VOLUME; i++) {
@@ -31,24 +31,24 @@ namespace Grove {
     }
 
     bool Chunk::isAir(int x, int y, int z) const {
-        if (y < 0 || y >= CHUNK_SIZE) return false;
+        if (y < 0 || y >= CHUNK_HEIGHT) return true;
 
         return getVoxel(x, y, z).isAir();
     }
 
     void Chunk::setVoxel(int x, int y, int z, std::uint8_t id) {
-        if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE)
+        if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_SIZE)
             return;
 
-        int index = x + (y * CHUNK_SIZE) + (z * CHUNK_SIZE * CHUNK_SIZE);
+        int index = x + (y * CHUNK_SIZE) + (z * CHUNK_SIZE * CHUNK_HEIGHT);
         m_Voxels[index].ID = id;
     }
 
     Voxel Chunk::getVoxel(int x, int y, int z) const {
-        if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_SIZE || z < 0 || z >= CHUNK_SIZE)
+        if (x < 0 || x >= CHUNK_SIZE || y < 0 || y >= CHUNK_HEIGHT || z < 0 || z >= CHUNK_SIZE)
             return { 0 };
 
-        int index = x + (y * CHUNK_SIZE) + (z * CHUNK_SIZE * CHUNK_SIZE);
+        int index = x + (y * CHUNK_SIZE) + (z * CHUNK_SIZE * CHUNK_HEIGHT);
         return m_Voxels[index];
     }
 
@@ -117,35 +117,41 @@ namespace Grove {
 
     void Chunk::generateTerrain() {
         const float NOISE_SCALE = 1.5f;
-        const float GROUND_BIAS = 0.3f;
+        const float SEA_LEVEL = 10.0f;
 
         for (int z = 0; z < CHUNK_SIZE; z++) {
             float globalZ = m_Position.z + z;
-            for (int y = 0; y < CHUNK_SIZE; y++) {
+            for (int y = 0; y < CHUNK_HEIGHT; y++) {
                 float globalY = y;
 
-                if (y > CHUNK_SIZE * 0.7f) {
+                if (y > CHUNK_HEIGHT * 0.9f) {
                     continue;
                 }
 
                 for (int x = 0; x < CHUNK_SIZE; x++) {
                     float globalX = m_Position.x + x;
 
-                    float noiseValue = m_TerrainNoise.GetNoise(
-                        globalX * NOISE_SCALE,
-                        globalY * NOISE_SCALE,
-                        globalZ * NOISE_SCALE
-                    );
+                    float continental = m_ContinentNoise.GetNoise(globalX, globalZ);
+                    float mountainShapeNoise = m_TerrainNoise.GetNoise(globalX, globalZ);
+                    float terrainNoise = m_TerrainNoise.GetNoise(globalX * NOISE_SCALE, globalY * NOISE_SCALE, globalZ * NOISE_SCALE);
 
-                    float heightGradient = (float)y / CHUNK_SIZE;
-                    float density = (noiseValue * 1.5f) + GROUND_BIAS - heightGradient;
+                    float plainsHeight = 20.0f + ((continental + 1.0f) * 10.0f);
+                    float mountainHeight = 30.0f + (mountainShapeNoise * 150.0f * continental);
+                    if (mountainHeight < 30.0f) mountainHeight = 30.0f;
+
+                    float blend = (continental + 0.1f) / 0.3f;
+                    blend = glm::clamp(blend, 0.0f, 1.0f);
+
+                    float terrainHeight = (plainsHeight * (1.0f - blend)) + (mountainHeight * blend);
+                    float amplifier = (0.05f * (1.0f - blend)) + (1.0f * blend);
+
+                    float density = (terrainNoise * amplifier) + ((terrainHeight - globalY) * 0.2f);
                     if (density > 0.0f) {
                         setVoxel(x, y, z, 2);
                     }
                     else {
                         setVoxel(x, y, z, 0);
                     }
-                    
                 }
 
             }
@@ -153,7 +159,7 @@ namespace Grove {
 
         for (int x = 0; x < CHUNK_SIZE; x++) {
             for (int z = 0; z < CHUNK_SIZE; z++) {
-                for (int y = CHUNK_SIZE - 1; y > 0; y--) {
+                for (int y = CHUNK_HEIGHT - 1; y > 0; y--) {
                     if (getVoxel(x, y, z).ID == 0 && getVoxel(x, y - 1, z).ID == 2) {
                         setVoxel(x, y - 1, z, 1);
                         break;
@@ -183,6 +189,24 @@ namespace Grove {
             { -0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, 0.5f, 0.5f, 0.5f, 0.5f },
             { 0.5f, 0.5f, -0.5f, 0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, -0.5f, 0.5f, -0.5f }
         };
+
+        auto isGlobalAir = [&](int glob_x, int glob_y, int glob_z) -> bool {
+            if (glob_y < 0 || glob_y >= CHUNK_HEIGHT) return true;
+            if (glob_x < 0) {
+                return (left) ? left->isAir(glob_x + CHUNK_SIZE, glob_y, glob_z) : true;
+            }
+            if (glob_x >= CHUNK_SIZE) {
+                return (right) ? right->isAir(glob_x - CHUNK_SIZE, glob_y, glob_z) : true;
+            }
+            if (glob_z < 0) {
+                return (back) ? back->isAir(glob_x, glob_y, glob_z + CHUNK_SIZE) : true;
+            }
+            if (glob_z >= CHUNK_SIZE) {
+                return (front) ? front->isAir(glob_x, glob_y, glob_z - CHUNK_SIZE) : true;
+            }
+
+            return isAir(glob_x, glob_y, glob_z);
+            };
         
         auto addFace = [&](int x, int y, int z, int faceID) {
             unsigned int offset = vertices.size() / 3;
@@ -202,6 +226,8 @@ namespace Grove {
             glm::vec3 col = baseColour + (glm::vec3(noiseValue) * variance);
             col = glm::clamp(col, 0.0f, 1.0f);
 
+            
+
             for (int i = 0; i < 4; i++) {
 
                 vertices.push_back(faceVertices[faceID][i * 3] + x);
@@ -214,9 +240,9 @@ namespace Grove {
 
                 AONeighbours n = getAONeighbors(faceID, i);
 
-                bool side1 = !isAir(x + n.s1[0], y + n.s1[1], z + n.s1[2]);
-                bool side2 = !isAir(x + n.s2[0], y + n.s2[1], z + n.s2[2]);
-                bool corner = !isAir(x + n.c[0], y + n.c[1], z + n.c[2]);
+                bool side1 = !isGlobalAir(x + n.s1[0], y + n.s1[1], z + n.s1[2]);
+                bool side2 = !isGlobalAir(x + n.s2[0], y + n.s2[1], z + n.s2[2]);
+                bool corner = !isGlobalAir(x + n.c[0], y + n.c[1], z + n.c[2]);
 
                 float v_ao = calculateVertexAO(side1, side2, corner);
                 ao.push_back(v_ao);
@@ -249,26 +275,8 @@ namespace Grove {
 
         };
 
-        auto isGlobalAir = [&](int glob_x, int glob_y, int glob_z) -> bool {
-            if (glob_y < 0 || glob_y >= CHUNK_SIZE) return true;
-            if (glob_x < 0) {
-                return (left) ? left->isAir(glob_x + CHUNK_SIZE, glob_y, glob_z) : true;
-            }
-            if (glob_x >= CHUNK_SIZE) {
-                return (right) ? right->isAir(glob_x - CHUNK_SIZE, glob_y, glob_z) : true;
-            }
-            if (glob_z < 0) {
-                return (back) ? back->isAir(glob_x, glob_y, glob_z + CHUNK_SIZE) : true;
-            }
-            if (glob_z >= CHUNK_SIZE) {
-                return (front) ? front->isAir(glob_x, glob_y, glob_z - CHUNK_SIZE) : true;
-            }
-
-            return isAir(glob_x, glob_y, glob_z);
-        };
-
         for (int x = 0; x < CHUNK_SIZE; x++) {
-            for (int y = 0; y < CHUNK_SIZE; y++) {
+            for (int y = 0; y < CHUNK_HEIGHT; y++) {
                 for (int z = 0; z < CHUNK_SIZE; z++) {
                     if (isAir(x, y, z)) continue;
                     if (isGlobalAir(x + 1, y, z)) addFace(x, y, z, 0);

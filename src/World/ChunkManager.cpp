@@ -12,6 +12,11 @@ namespace Grove {
         m_TerrainNoise.SetFractalGain(0.5f);
         m_TerrainNoise.SetFrequency(0.003f);
 
+        m_ContinentNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+        m_ContinentNoise.SetFrequency(0.001f);
+        m_ContinentNoise.SetFractalType(FastNoiseLite::FractalType_FBm);
+        m_ContinentNoise.SetFractalOctaves(2);
+
         m_GrassNoise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
         m_GrassNoise.SetSeed(33);
         m_GrassNoise.SetFrequency(0.05f);
@@ -39,7 +44,8 @@ namespace Grove {
         float worldX = x * CHUNK_SIZE;
         float worldZ = z * CHUNK_SIZE;
 
-        std::unique_ptr<Chunk> newChunk = std::make_unique<Chunk>(glm::vec3(worldX, 0.0f, worldZ), m_TerrainNoise, m_GrassNoise, m_StoneNoise);
+
+        std::unique_ptr<Chunk> newChunk = std::make_unique<Chunk>(glm::vec3(worldX, 0.0f, worldZ), m_TerrainNoise, m_GrassNoise, m_StoneNoise, m_ContinentNoise);
 
         m_Chunks[coord] = std::move(newChunk);
         updateChunk(x, z);

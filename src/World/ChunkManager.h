@@ -45,6 +45,8 @@ namespace Grove {
         FastNoiseLite m_TerrainNoise;
         FastNoiseLite m_GrassNoise;
         FastNoiseLite m_StoneNoise;
+        FastNoiseLite m_ContinentNoise;
+        FastNoiseLite m_MountainNoise;
 
         void createChunk(int x, int z);
         Chunk* getChunkPtr(int x, int z);
